@@ -1,5 +1,5 @@
 
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, ObjectId } from 'mongodb';
 
 class MongoDBConnection {
   private client: MongoClient | null = null;
@@ -44,7 +44,7 @@ export const mongoConnection = new MongoDBConnection();
 
 // Focus session data interface
 export interface FocusSession {
-  _id?: string;
+  _id?: ObjectId | string;
   userId: string;
   startTime: Date;
   endTime?: Date;
@@ -56,7 +56,7 @@ export interface FocusSession {
 
 // Custom notification interface
 export interface NotificationRecord {
-  _id?: string;
+  _id?: ObjectId | string;
   userId: string;
   name: string;
   message: string;
@@ -68,7 +68,7 @@ export interface NotificationRecord {
 
 // Health reminder interface
 export interface HealthReminderRecord {
-  _id?: string;
+  _id?: ObjectId | string;
   userId: string;
   type: 'posture' | 'hydration' | 'eyecare';
   interval: number;
@@ -93,13 +93,14 @@ export class FocusDataService {
 
   async updateFocusSession(sessionId: string, updates: Partial<FocusSession>): Promise<void> {
     await this.db.collection('focusSessions').updateOne(
-      { _id: sessionId },
+      { _id: new ObjectId(sessionId) },
       { $set: updates }
     );
   }
 
   async getFocusSessionsByUser(userId: string): Promise<FocusSession[]> {
-    return await this.db.collection('focusSessions').find({ userId }).toArray();
+    const result = await this.db.collection<FocusSession>('focusSessions').find({ userId }).toArray();
+    return result;
   }
 
   // Custom Notifications
@@ -109,18 +110,19 @@ export class FocusDataService {
   }
 
   async getNotificationsByUser(userId: string): Promise<NotificationRecord[]> {
-    return await this.db.collection('notifications').find({ userId }).toArray();
+    const result = await this.db.collection<NotificationRecord>('notifications').find({ userId }).toArray();
+    return result;
   }
 
   async updateNotification(notificationId: string, updates: Partial<NotificationRecord>): Promise<void> {
     await this.db.collection('notifications').updateOne(
-      { _id: notificationId },
+      { _id: new ObjectId(notificationId) },
       { $set: updates }
     );
   }
 
   async deleteNotification(notificationId: string): Promise<void> {
-    await this.db.collection('notifications').deleteOne({ _id: notificationId });
+    await this.db.collection('notifications').deleteOne({ _id: new ObjectId(notificationId) });
   }
 
   // Health Reminders
@@ -130,17 +132,18 @@ export class FocusDataService {
   }
 
   async getHealthRemindersByUser(userId: string): Promise<HealthReminderRecord[]> {
-    return await this.db.collection('healthReminders').find({ userId }).toArray();
+    const result = await this.db.collection<HealthReminderRecord>('healthReminders').find({ userId }).toArray();
+    return result;
   }
 
   async updateHealthReminder(reminderId: string, updates: Partial<HealthReminderRecord>): Promise<void> {
     await this.db.collection('healthReminders').updateOne(
-      { _id: reminderId },
+      { _id: new ObjectId(reminderId) },
       { $set: updates }
     );
   }
 
   async deleteHealthReminder(reminderId: string): Promise<void> {
-    await this.db.collection('healthReminders').deleteOne({ _id: reminderId });
+    await this.db.collection('healthReminders').deleteOne({ _id: new ObjectId(reminderId) });
   }
 }

@@ -11,7 +11,7 @@ export interface ElectronAPI {
 
 // Check if running in Electron
 const isElectron = () => {
-  return window && window.process && window.process.type;
+  return typeof window !== 'undefined' && window.electron !== undefined;
 };
 
 // Mock API for web environment
