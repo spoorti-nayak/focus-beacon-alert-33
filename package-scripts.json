@@ -8,7 +8,7 @@
     "electron-dev": "cross-env ELECTRON_IS_DEV=true electron public/electron.js",
     "build-electron": "npm run build && electron public/electron.js",
     "server": "node server/index.js",
-    "dev-all": "node scripts/dev.js",
-    "start": "concurrently \"npm run dev\" \"npm run server\" \"wait-on http://localhost:8080 && npm run electron-dev\""
+    "dev-all": "concurrently \"npm run dev\" \"npm run server\" \"wait-on http://localhost:8080 && npm run electron-dev\"",
+    "start": "npm run dev-all"
   }
 }

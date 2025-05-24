@@ -7,9 +7,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 
+console.log('🚀 Starting MERN + Electron Development Environment...');
+
 // Function to spawn a process with proper output handling
 function spawnProcess(command, args, options = {}) {
-  console.log(`Starting: ${command} ${args.join(' ')}`);
+  console.log(`▶️  Starting: ${command} ${args.join(' ')}`);
   
   const child = spawn(command, args, {
     cwd: rootDir,
@@ -19,38 +21,73 @@ function spawnProcess(command, args, options = {}) {
   });
 
   child.stdout.on('data', (data) => {
-    console.log(`[${command}] ${data.toString().trim()}`);
+    const output = data.toString().trim();
+    if (output) {
+      console.log(`[${command}] ${output}`);
+    }
   });
 
   child.stderr.on('data', (data) => {
-    console.error(`[${command}] ${data.toString().trim()}`);
+    const output = data.toString().trim();
+    if (output) {
+      console.error(`[${command}] ${output}`);
+    }
   });
 
   child.on('close', (code) => {
-    console.log(`[${command}] Process exited with code ${code}`);
+    if (code !== 0) {
+      console.log(`❌ [${command}] Process exited with code ${code}`);
+    }
+  });
+
+  child.on('error', (error) => {
+    console.error(`❌ [${command}] Error:`, error.message);
   });
 
   return child;
 }
 
 // Start all processes
-console.log('Starting development environment...');
+const processes = [];
 
-// Start Vite dev server
-const viteProcess = spawnProcess('npm', ['run', 'dev']);
+try {
+  // Start Express API server
+  console.log('🗄️  Starting Express API Server...');
+  const serverProcess = spawnProcess('node', ['server/index.js']);
+  processes.push(serverProcess);
 
-// Start API server
-const serverProcess = spawnProcess('node', ['server/index.js']);
+  // Start Vite dev server  
+  console.log('⚛️  Starting React Vite Server...');
+  const viteProcess = spawnProcess('npm', ['run', 'dev']);
+  processes.push(viteProcess);
 
-// Wait a bit for servers to start, then launch Electron
-setTimeout(() => {
-  const electronProcess = spawnProcess('npm', ['run', 'electron-dev']);
-}, 3000);
+  // Wait for servers to start, then launch Electron
+  setTimeout(() => {
+    console.log('🖥️  Starting Electron App...');
+    const electronProcess = spawnProcess('npm', ['run', 'electron-dev']);
+    processes.push(electronProcess);
+  }, 4000);
+
+} catch (error) {
+  console.error('❌ Error starting development environment:', error);
+}
 
 // Handle process termination
-process.on('SIGINT', () => {
-  console.log('\nShutting down development environment...');
-  viteProcess.kill();
-  serverProcess.kill();
-  process.exit(0);
-});
+function cleanup() {
+  console.log('\n🔄 Shutting down development environment...');
+  processes.forEach(process => {
+    if (process && !process.killed) {
+      process.kill('SIGTERM');
+    }
+  });
+  setTimeout(() => {
+    process.exit(0);
+  }, 1000);
+}
+
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
+process.on('exit', cleanup);
+
+console.log('✅ Development environment started!');
+console.log('📝 Use Ctrl+C to stop all processes');
