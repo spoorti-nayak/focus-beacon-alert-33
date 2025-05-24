@@ -55,33 +55,25 @@ const mockElectronAPI: ElectronAPI = {
   }
 };
 
-// Real Electron API
+// Real Electron API using the preload script
 const realElectronAPI: ElectronAPI = {
   startFocusMode: (apps: string[]) => {
-    const { ipcRenderer } = (window as any).require('electron');
-    return ipcRenderer.invoke('start-focus-mode', apps);
+    return (window as any).electron.startFocusMode(apps);
   },
   stopFocusMode: () => {
-    const { ipcRenderer } = (window as any).require('electron');
-    return ipcRenderer.invoke('stop-focus-mode');
+    return (window as any).electron.stopFocusMode();
   },
   updateWhitelist: (apps: string[]) => {
-    const { ipcRenderer } = (window as any).require('electron');
-    return ipcRenderer.invoke('update-whitelist', apps);
+    return (window as any).electron.updateWhitelist(apps);
   },
   getRunningApps: () => {
-    const { ipcRenderer } = (window as any).require('electron');
-    return ipcRenderer.invoke('get-running-apps');
+    return (window as any).electron.getRunningApps();
   },
   getFocusStatus: () => {
-    const { ipcRenderer } = (window as any).require('electron');
-    return ipcRenderer.invoke('get-focus-status');
+    return (window as any).electron.getFocusStatus();
   },
   onFocusBreakDetected: (callback: (data: any) => void) => {
-    const { ipcRenderer } = (window as any).require('electron');
-    ipcRenderer.on('focus-break-detected', (event, data) => {
-      callback(data);
-    });
+    return (window as any).electron.onFocusBreakDetected(callback);
   }
 };
 

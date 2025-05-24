@@ -1,9 +1,13 @@
 
-const { app, BrowserWindow, ipcMain, powerMonitor } = require('electron');
-const path = require('path');
-const isDev = require('electron-is-dev');
-const { exec } = require('child_process');
-const os = require('os');
+import { app, BrowserWindow, ipcMain, powerMonitor } from 'electron';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import isDev from 'electron-is-dev';
+import { exec } from 'child_process';
+import os from 'os';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let mainWindow;
 let focusModeEnabled = false;
@@ -15,17 +19,18 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      preload: join(__dirname, 'preload.js'),
     },
   });
 
-  mainWindow.loadURL(
-    isDev
-      ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`
-  );
+  const startUrl = isDev 
+    ? 'http://localhost:8080' 
+    : `file://${join(__dirname, '../dist/index.html')}`;
+  
+  mainWindow.loadURL(startUrl);
 
   if (isDev) {
     mainWindow.webContents.openDevTools();

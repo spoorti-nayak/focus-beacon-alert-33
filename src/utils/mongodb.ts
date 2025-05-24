@@ -4,7 +4,12 @@ import { MongoClient, Db, ObjectId } from 'mongodb';
 class MongoDBConnection {
   private client: MongoClient | null = null;
   private db: Db | null = null;
-  private uri: string = process.env.MONGODB_URI || 'mongodb://localhost:27017/attention-please';
+  private uri: string;
+
+  constructor() {
+    // Use environment variable or fallback to localhost
+    this.uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/attention-please';
+  }
 
   async connect(): Promise<Db> {
     if (this.db) {
@@ -14,12 +19,33 @@ class MongoDBConnection {
     try {
       this.client = new MongoClient(this.uri);
       await this.client.connect();
-      this.db = this.client.db();
-      console.log('Connected to MongoDB');
+      
+      // Extract database name from URI or use default
+      const dbName = this.extractDbName(this.uri) || 'attention-please';
+      this.db = this.client.db(dbName);
+      
+      console.log(`Connected to MongoDB database: ${dbName}`);
       return this.db;
     } catch (error) {
       console.error('Failed to connect to MongoDB:', error);
       throw error;
+    }
+  }
+
+  private extractDbName(uri: string): string | null {
+    try {
+      // Handle MongoDB Atlas URI format
+      if (uri.includes('mongodb+srv://')) {
+        const match = uri.match(/\/([^?]+)/);
+        return match ? match[1] : null;
+      }
+      
+      // Handle local MongoDB URI format
+      const match = uri.match(/\/([^?]+)$/);
+      return match ? match[1] : null;
+    } catch (error) {
+      console.warn('Could not extract database name from URI:', error);
+      return null;
     }
   }
 
@@ -37,6 +63,10 @@ class MongoDBConnection {
       throw new Error('Database not connected. Call connect() first.');
     }
     return this.db;
+  }
+
+  isConnected(): boolean {
+    return this.db !== null;
   }
 }
 
@@ -101,6 +131,29 @@ export class FocusDataService {
   async getFocusSessionsByUser(userId: string): Promise<FocusSession[]> {
     const result = await this.db.collection<FocusSession>('focusSessions').find({ userId }).toArray();
     return result;
+  }
+
+  async getFocusSessionStats(userId: string): Promise<{
+    totalSessions: number;
+    totalFocusTime: number;
+    averageFocusScore: number;
+    totalDistractionsBlocked: number;
+  }> {
+    const sessions = await this.getFocusSessionsByUser(userId);
+    
+    const totalSessions = sessions.length;
+    const totalFocusTime = sessions.reduce((sum, session) => sum + session.duration, 0);
+    const averageFocusScore = sessions.length > 0 
+      ? sessions.reduce((sum, session) => sum + session.focusScore, 0) / sessions.length 
+      : 0;
+    const totalDistractionsBlocked = sessions.reduce((sum, session) => sum + session.distractionsBlocked, 0);
+
+    return {
+      totalSessions,
+      totalFocusTime,
+      averageFocusScore: Math.round(averageFocusScore),
+      totalDistractionsBlocked
+    };
   }
 
   // Custom Notifications
