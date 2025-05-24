@@ -1,17 +1,16 @@
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FocusMode } from '@/components/FocusMode';
 import { WhitelistManager } from '@/components/WhitelistManager';
 import { CustomRules } from '@/components/CustomRules';
+import { FocusProvider, useFocus } from '@/contexts/FocusContext';
 import { Eye, Shield, Settings, Bell } from 'lucide-react';
 
-const Index = () => {
-  const [focusModeEnabled, setFocusModeEnabled] = useState(false);
+const IndexContent = () => {
+  const { focusModeEnabled, setFocusModeEnabled, focusStats } = useFocus();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -48,15 +47,15 @@ const Index = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">2h 34m</div>
+                <div className="text-2xl font-bold text-green-600">{focusStats.focusedToday}</div>
                 <div className="text-sm text-green-700">Focused Today</div>
               </div>
               <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <div className="text-2xl font-bold text-orange-600">7</div>
+                <div className="text-2xl font-bold text-orange-600">{focusStats.distractionsBlocked}</div>
                 <div className="text-sm text-orange-700">Distractions Blocked</div>
               </div>
               <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">85%</div>
+                <div className="text-2xl font-bold text-blue-600">{focusStats.focusScore}%</div>
                 <div className="text-sm text-blue-700">Focus Score</div>
               </div>
             </div>
@@ -76,7 +75,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="rules" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Custom Rules
+              Custom Notifications
             </TabsTrigger>
           </TabsList>
 
@@ -94,6 +93,14 @@ const Index = () => {
         </Tabs>
       </div>
     </div>
+  );
+};
+
+const Index = () => {
+  return (
+    <FocusProvider>
+      <IndexContent />
+    </FocusProvider>
   );
 };
 

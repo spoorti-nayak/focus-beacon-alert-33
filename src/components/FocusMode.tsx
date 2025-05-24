@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Clock, Target, AlertTriangle } from 'lucide-react';
+import { Shield, Clock, Target, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useFocus } from '@/contexts/FocusContext';
 
 interface FocusModeProps {
   isEnabled: boolean;
@@ -11,6 +12,8 @@ interface FocusModeProps {
 }
 
 export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
+  const { whitelistedApps, whitelistedWebsites, focusStats } = useFocus();
+
   return (
     <div className="space-y-6">
       <Card>
@@ -27,7 +30,7 @@ export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
               <h3 className="font-semibold">Enable Focus Mode</h3>
-              <p className="text-sm text-gray-600">Monitor active apps and block distractions</p>
+              <p className="text-sm text-gray-600">Monitor active apps and trigger notifications for distractions</p>
             </div>
             <Switch checked={isEnabled} onCheckedChange={onToggle} />
           </div>
@@ -35,28 +38,20 @@ export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 border rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-blue-600" />
-                <h4 className="font-medium">Session Timer</h4>
+                <Target className="h-4 w-4 text-green-600" />
+                <h4 className="font-medium">Whitelisted Apps</h4>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Set focus session duration</p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">25m</Button>
-                <Button variant="outline" size="sm">45m</Button>
-                <Button variant="outline" size="sm">60m</Button>
-              </div>
+              <p className="text-sm text-gray-600 mb-3">Applications allowed during focus</p>
+              <div className="text-2xl font-bold text-green-600">{whitelistedApps.length}</div>
             </div>
 
             <div className="p-4 border rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <Target className="h-4 w-4 text-green-600" />
-                <h4 className="font-medium">Break Intervals</h4>
+                <Target className="h-4 w-4 text-blue-600" />
+                <h4 className="font-medium">Whitelisted Websites</h4>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Configure break reminders</p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">5m</Button>
-                <Button variant="outline" size="sm">10m</Button>
-                <Button variant="outline" size="sm">15m</Button>
-              </div>
+              <p className="text-sm text-gray-600 mb-3">Websites allowed during focus</p>
+              <div className="text-2xl font-bold text-blue-600">{whitelistedWebsites.length}</div>
             </div>
           </div>
 
@@ -67,7 +62,7 @@ export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
                 <span className="font-medium text-green-800">Focus Mode Active</span>
               </div>
               <p className="text-sm text-green-700">
-                Monitoring active applications and ready to block distractions
+                Monitoring active applications and ready to send notifications for distractions
               </p>
             </div>
           )}
@@ -76,33 +71,44 @@ export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Apps and websites accessed during focus sessions</CardDescription>
+          <CardTitle>Focus Session Activity</CardTitle>
+          <CardDescription>Real-time monitoring status and statistics</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                  <span className="text-xs font-medium">VS</span>
+            {isEnabled ? (
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-8 w-8 text-green-500" />
+                  <div>
+                    <p className="font-medium">Focus Mode Running</p>
+                    <p className="text-sm text-green-600">Actively monitoring for distractions</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">Visual Studio Code</p>
-                  <p className="text-sm text-gray-600">Allowed - Whitelisted</p>
-                </div>
+                <Badge variant="default">Active</Badge>
               </div>
-              <Badge variant="outline">Active 2h</Badge>
-            </div>
+            ) : (
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-8 w-8 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Focus Mode Inactive</p>
+                    <p className="text-sm text-gray-600">Enable focus mode to start monitoring</p>
+                  </div>
+                </div>
+                <Badge variant="secondary">Inactive</Badge>
+              </div>
+            )}
 
-            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-8 w-8 text-red-500" />
-                <div>
-                  <p className="font-medium">Social Media Site</p>
-                  <p className="text-sm text-red-600">Blocked - Not whitelisted</p>
-                </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="text-center p-3 bg-orange-50 rounded-lg">
+                <div className="text-lg font-bold text-orange-600">{focusStats.distractionsBlocked}</div>
+                <div className="text-xs text-orange-700">Distractions Detected</div>
               </div>
-              <Badge variant="destructive">Blocked</Badge>
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-lg font-bold text-blue-600">{whitelistedApps.length + whitelistedWebsites.length}</div>
+                <div className="text-xs text-blue-700">Total Whitelisted</div>
+              </div>
             </div>
           </div>
         </CardContent>
