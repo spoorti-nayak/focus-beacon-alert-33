@@ -71,11 +71,11 @@ const IndexContent = () => {
             </TabsTrigger>
             <TabsTrigger value="whitelist" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              Whitelist
+              App Whitelist
             </TabsTrigger>
             <TabsTrigger value="rules" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Custom Notifications
+              Notifications & Health
             </TabsTrigger>
           </TabsList>
 

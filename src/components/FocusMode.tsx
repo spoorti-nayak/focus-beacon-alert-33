@@ -1,9 +1,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Clock, Target, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Shield, Target, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useFocus } from '@/contexts/FocusContext';
 
 interface FocusModeProps {
@@ -12,7 +11,10 @@ interface FocusModeProps {
 }
 
 export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
-  const { whitelistedApps, whitelistedWebsites, focusStats } = useFocus();
+  const { whitelistedApps, customNotifications, healthReminders, focusStats } = useFocus();
+
+  const activeCustomNotifications = customNotifications.filter(n => n.active).length;
+  const activeHealthReminders = healthReminders.filter(r => r.active).length;
 
   return (
     <div className="space-y-6">
@@ -35,7 +37,7 @@ export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
             <Switch checked={isEnabled} onCheckedChange={onToggle} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 border rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="h-4 w-4 text-green-600" />
@@ -48,10 +50,19 @@ export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
             <div className="p-4 border rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="h-4 w-4 text-blue-600" />
-                <h4 className="font-medium">Whitelisted Websites</h4>
+                <h4 className="font-medium">Custom Notifications</h4>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Websites allowed during focus</p>
-              <div className="text-2xl font-bold text-blue-600">{whitelistedWebsites.length}</div>
+              <p className="text-sm text-gray-600 mb-3">Active custom notifications</p>
+              <div className="text-2xl font-bold text-blue-600">{activeCustomNotifications}</div>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="h-4 w-4 text-purple-600" />
+                <h4 className="font-medium">Health Reminders</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">Active health reminders</p>
+              <div className="text-2xl font-bold text-purple-600">{activeHealthReminders}</div>
             </div>
           </div>
 
@@ -106,8 +117,8 @@ export const FocusMode = ({ isEnabled, onToggle }: FocusModeProps) => {
                 <div className="text-xs text-orange-700">Distractions Detected</div>
               </div>
               <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-lg font-bold text-blue-600">{whitelistedApps.length + whitelistedWebsites.length}</div>
-                <div className="text-xs text-blue-700">Total Whitelisted</div>
+                <div className="text-lg font-bold text-blue-600">{whitelistedApps.length}</div>
+                <div className="text-xs text-blue-700">Whitelisted Apps</div>
               </div>
             </div>
           </div>
