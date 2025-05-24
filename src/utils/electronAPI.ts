@@ -11,7 +11,7 @@ export interface ElectronAPI {
 
 // Check if running in Electron
 const isElectron = () => {
-  return typeof window !== 'undefined' && window.electron !== undefined;
+  return typeof window !== 'undefined' && (window as any).electron !== undefined;
 };
 
 // Mock API for web environment
@@ -58,27 +58,27 @@ const mockElectronAPI: ElectronAPI = {
 // Real Electron API
 const realElectronAPI: ElectronAPI = {
   startFocusMode: (apps: string[]) => {
-    const { ipcRenderer } = window.require('electron');
+    const { ipcRenderer } = (window as any).require('electron');
     return ipcRenderer.invoke('start-focus-mode', apps);
   },
   stopFocusMode: () => {
-    const { ipcRenderer } = window.require('electron');
+    const { ipcRenderer } = (window as any).require('electron');
     return ipcRenderer.invoke('stop-focus-mode');
   },
   updateWhitelist: (apps: string[]) => {
-    const { ipcRenderer } = window.require('electron');
+    const { ipcRenderer } = (window as any).require('electron');
     return ipcRenderer.invoke('update-whitelist', apps);
   },
   getRunningApps: () => {
-    const { ipcRenderer } = window.require('electron');
+    const { ipcRenderer } = (window as any).require('electron');
     return ipcRenderer.invoke('get-running-apps');
   },
   getFocusStatus: () => {
-    const { ipcRenderer } = window.require('electron');
+    const { ipcRenderer } = (window as any).require('electron');
     return ipcRenderer.invoke('get-focus-status');
   },
   onFocusBreakDetected: (callback: (data: any) => void) => {
-    const { ipcRenderer } = window.require('electron');
+    const { ipcRenderer } = (window as any).require('electron');
     ipcRenderer.on('focus-break-detected', (event, data) => {
       callback(data);
     });
